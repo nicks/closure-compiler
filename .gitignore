@@ -3,3 +3,4 @@ TESTS-TestSuites.xml
 junit*.properties
 target/
 *~
+package/closure-npc/lib/closure-npc.jar
