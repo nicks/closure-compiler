@@ -4,3 +4,4 @@ junit*.properties
 target/
 *~
 .settings
+package/closure-npc/lib/closure-npc.jar
