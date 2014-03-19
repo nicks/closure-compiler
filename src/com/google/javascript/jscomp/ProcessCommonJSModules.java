@@ -107,6 +107,10 @@ public class ProcessCommonJSModules implements CompilerPass {
             .replaceAll("\\.", "");
   }
 
+  private CompilerInput getInput(NodeTraversal t) {
+    return currentInput == null ? t.getInput() : currentInput;
+  }
+
   /**
    * Visits require, every "script" and special module.exports assignments.
    */
@@ -176,10 +180,6 @@ public class ProcessCommonJSModules implements CompilerPass {
           IR.call(IR.getprop(IR.name("goog"), IR.string("require")),
               IR.string(moduleName))).copyInformationFromForTree(require));
       compiler.reportCodeChange();
-    }
-
-    private CompilerInput getInput(NodeTraversal t) {
-      return currentInput == null ? t.getInput() : currentInput;
     }
 
     /**
@@ -429,7 +429,7 @@ public class ProcessCommonJSModules implements CompilerPass {
           }
 
           String moduleName = name.substring(0, endIndex);
-          String loadAddress = loader.locate(moduleName, t.getInput());
+          String loadAddress = loader.locate(moduleName, getInput(t));
           if (loadAddress == null) {
             t.makeError(typeNode, LOAD_ERROR, moduleName);
             return;
