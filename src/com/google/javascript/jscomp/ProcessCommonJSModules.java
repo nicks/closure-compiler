@@ -107,6 +107,24 @@ public class ProcessCommonJSModules implements CompilerPass {
             .replaceAll("\\.", "");
   }
 
+  private String locateModule(NodeTraversal t, String requireName, Node currentNode) {
+    String loadAddress = loader.locate(requireName, getInput(t));
+    boolean loadSuccess = false;
+    try {
+      if (loadAddress != null) {
+        loader.load(loadAddress);
+        loadSuccess = true;
+      }
+    } catch (ES6ModuleLoader.LoadFailedException e) {}
+
+    if (!loadSuccess) {
+      compiler.report(t.makeError(currentNode, LOAD_ERROR, requireName));
+      return null;
+    }
+
+    return toModuleName(loadAddress);
+  }
+
   private CompilerInput getInput(NodeTraversal t) {
     return currentInput == null ? t.getInput() : currentInput;
   }
@@ -153,22 +171,11 @@ public class ProcessCommonJSModules implements CompilerPass {
      */
     private void visitRequireCall(NodeTraversal t, Node require, Node parent) {
       String requireName = require.getChildAtIndex(1).getString();
-      String loadAddress = loader.locate(requireName, getInput(t));
-      boolean loadSuccess = false;
-      try {
-        if (loadAddress != null) {
-          loader.load(loadAddress);
-          loadSuccess = true;
-        }
-      } catch (ES6ModuleLoader.LoadFailedException e) {}
-
-      if (!loadSuccess) {
-        compiler.report(t.makeError(require, LOAD_ERROR, requireName));
+      String moduleName = locateModule(t, requireName, require);
+      if (moduleName == null) {
         parent.removeChild(require);
         return;
       }
-
-      String moduleName = toModuleName(loadAddress);
       Node moduleRef = IR.name(moduleName).srcref(require);
       parent.replaceChild(require, moduleRef);
       Node script = getCurrentScriptNode(parent);
@@ -452,14 +459,7 @@ public class ProcessCommonJSModules implements CompilerPass {
             localTypeName = name.substring(endIndex);
           }
 
-          String moduleName = name.substring(0, endIndex);
-          String loadAddress = loader.locate(moduleName, getInput(t));
-          if (loadAddress == null) {
-            t.makeError(typeNode, LOAD_ERROR, moduleName);
-            return;
-          }
-
-          String globalModuleName = toModuleName(loadAddress);
+          String globalModuleName = locateModule(t, name.substring(0, endIndex), typeNode);
           typeNode.setString(
               localTypeName == null ?
               globalModuleName :
