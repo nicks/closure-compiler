@@ -97,6 +97,16 @@ public class CommonJSIntegrationTest extends IntegrationTestCase {
          TypeValidator.TYPE_MISMATCH_WARNING);
   }
 
+  public void testCrossModuleTypeAnnotation4() {
+    test(createCompilerOptions(),
+         new String[] {
+           "/** @constructor */ function Hello() {}" +
+           "module.exports = Hello;",
+           "/** @type {./i0} */ var hello = 1;"
+         },
+         TypeValidator.TYPE_MISMATCH_WARNING);
+  }
+
   public void testCrossModuleSubclass1() {
     test(createCompilerOptions(),
          new String[] {
