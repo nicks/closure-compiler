@@ -81,7 +81,7 @@ crypto.Hash = function(algorithm, options) {};
 /**
  * @param {string|Buffer} data
  * @param {string=} input_encoding
- * @return {void}
+ * @return {crypto.Hash}
  */
 crypto.Hash.prototype.update;
 
