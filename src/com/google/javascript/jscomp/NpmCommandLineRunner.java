@@ -379,7 +379,7 @@ public class NpmCommandLineRunner extends
   static File tryFile(File dir, String customName) {
     // Do not try to load other types of requires, like json files.
     if (customName.endsWith(".json")) {
-      return new File(dir, customName + ".js");
+      return new File(dir, customName);
     }
 
     File candidate = new File(dir, customName);
@@ -515,6 +515,15 @@ public class NpmCommandLineRunner extends
       } else {
         String path = moduleRoot.resolve(name).normalize().toString();
         newFile = SourceFile.fromFile(path);
+
+        if (name.endsWith(".json")) {
+          // Attempt to modify the file's contents to add an exports declaration.
+          // Otherwise the compiler will interpret the JSON object as a block.
+          try {
+            String json = "module.exports = " + newFile.getCode();
+            newFile = SourceFile.fromCode(path, json);
+          } catch (IOException e) {}
+        }
       }
 
       CompilerInput newInput = new CompilerInput(newFile);
