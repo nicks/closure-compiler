@@ -17,19 +17,88 @@
 /**
  * @fileoverview NodeJS built-ins.
  * @externs
+ * @see http://nodejs.org/api/globals.html
+ * @see http://nodejs.org/api/modules.html
+ * @author Daniel Wirtz <dcode@dcode.io>
+ * @author nicholas.j.santos@gmail.com (Nick Santos)
  */
 
-/** @const {string} */
+/**
+ * @param name
+ * @return {*}
+ */
+var require = function(name) {}
+
+/**
+ * @return {string}
+ */
+require.resolve = function() {};
+
+/**
+ * @type {Object.<string,*>}
+ */
+require.cache;
+
+/**
+ * @type {Array}
+ */
+require.extensions;
+
+/**
+ * @type {string}
+ */
 var __filename;
 
-/** @const {string} */
+/**
+ * @type {string}
+ */
 var __dirname;
 
 /**
- * @param {string} name
- * @return {?}
+ * @const
  */
-function require(name) {}
+var module = {};
+
+/**
+ * @type {*}
+ */
+var exports;
+
+/**
+ * @type {Object.<string,*>}
+ */
+module.exports;
+
+/**
+ * @type {function(string)}
+ */
+module.require;
+
+/**
+ * @type {string}
+ */
+module.filename;
+
+/**
+ * @type {boolean}
+ */
+module.loaded;
+
+/**
+ * @type {*}
+ */
+module.parent;
+
+/**
+ * @type {Array}
+ */
+module.children;
+
+/**
+ * @type {Object.<string,*>}
+ */
+var global = {};
+
 
 // http://nodejs.org/api/timers.html
 
