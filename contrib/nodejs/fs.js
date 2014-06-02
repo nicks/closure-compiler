@@ -679,3 +679,5 @@ fs.FSWatcher = function () {};
  * @return {void}
  */
 fs.FSWatcher.prototype.close;
+
+module.exports = fs;
