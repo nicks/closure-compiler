@@ -1027,6 +1027,10 @@ public class CommandLineRunner extends
       ImmutableSet.<String>builder()
       .addAll(DEFAULT_EXTERNS_NAMES)
       .add("nodejs.js")
+      .add("nodejs_events.js")
+      .add("nodejs_stream.js")
+      .add("nodejs_child_process.js")
+      .add("nodejs_process.js")
       .build();
 
   final static String EMBEDDED_EXTERNS_PREFIX = "externs.zip//";

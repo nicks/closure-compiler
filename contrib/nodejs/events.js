@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 The Closure Compiler Authors.
+ * Copyright 2014 The Closure Compiler Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,93 +15,8 @@
  */
 
 /**
- * @fileoverview Definitions for node's "events" module.
- * @see http://nodejs.org/api/events.html
- * @see https://github.com/joyent/node/blob/master/lib/events.js
- * @author Daniel Wirtz <dcode@dcode.io>
+ * @fileoverview Shims the "events" node module. The API is defined in the main "externs" directory.
+ * @author d@darylkoop.com (Daryl Koopersmith)
  */
-
-/**
-BEGIN_NODE_INCLUDE
-var events = require('events');
-END_NODE_INCLUDE
- */
-
-/**
- * @const
- */
-var events = {};
-
-/**
- * @constructor
- */
-events.EventEmitter = function() {};
-
-/**
- * @param {string} event
- * @param {function(...)} listener
- * @return {events.EventEmitter}
- */
-events.EventEmitter.prototype.addListener;
-
-/**
- * @param {string} event
- * @param {function(...)} listener
- * @return {events.EventEmitter}
- */
-events.EventEmitter.prototype.on;
-
-/**
- * @param {string} event
- * @param {function(...)} listener
- * @return {events.EventEmitter}
- */
-events.EventEmitter.prototype.once;
-
-/**
- * @param {string} event
- * @param {function(...)} listener
- * @return {events.EventEmitter}
- */
-events.EventEmitter.prototype.removeListener;
-
-/**
- * @param {string=} event
- * @return {events.EventEmitter}
- */
-events.EventEmitter.prototype.removeAllListeners;
-
-/**
- * @param {number} n
- * @return {void}
- */
-events.EventEmitter.prototype.setMaxListeners;
-
-/**
- * @param {string} event
- * @return {Array.<function(...)>}
- */
-events.EventEmitter.prototype.listeners;
-
-/**
- * @param {string} event
- * @param {...*} var_args
- * @return {boolean}
- */
-events.EventEmitter.prototype.emit;
-
-// Undocumented
-
-/**
- * @type {boolean}
- */
-events.usingDomains;
-
-/**
- * @param {events.EventEmitter} emitter
- * @param {string} type
- * @return {void}
- */
-events.EventEmitter.listenerCount;
 
 module.exports = events;

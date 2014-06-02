@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 The Closure Compiler Authors.
+ * Copyright 2014 The Closure Compiler Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,107 +15,8 @@
  */
 
 /**
- * @fileoverview Definitions for node's child_process module. Depends on the events module.
- * @see http://nodejs.org/api/child_process.html
- * @see https://github.com/joyent/node/blob/master/lib/child_process.js
- * @author Daniel Wirtz <dcode@dcode.io>
+ * @fileoverview Shims the "child_process" node module. The API is defined in the main "externs" directory.
+ * @author d@darylkoop.com (Daryl Koopersmith)
  */
-
-/**
- BEGIN_NODE_INCLUDE
- var child_process = require('child_process');
- END_NODE_INCLUDE
- */
-
-var events = require('events');
-var stream = require('stream');
-
-/**
- * @const
- */
-var child_process = {};
-
-/**
- * @constructor
- * @param {...*} var_args
- * @extends events.EventEmitter
- */
-child_process.ChildProcess = function(var_args) {}; // Private?
-
-/**
- * @type {stream.ReadableStream}
- */
-child_process.ChildProcess.prototype.stdin;
-
-/**
- * @type {stream.WritableStream}
- */
-child_process.ChildProcess.prototype.stdout;
-
-/**
- * @type {stream.WritableStream}
- */
-child_process.ChildProcess.prototype.stderr;
-
-/**
- * @type {number}
- */
-child_process.ChildProcess.prototype.pid;
-
-/**
- * @param {string=} signal
- * @return {void}
- */
-child_process.ChildProcess.prototype.kill;
-
-/**
- * @param {Object.<string,*>} message
- * @param {*} sendHandle
- * @return {void}
- */
-child_process.ChildProcess.prototype.send;
-
-/**
- * @return {void}
- */
-child_process.ChildProcess.prototype.disconnect;
-
-/**
- * @typedef {{cwd: string, stdio: (Array|string), customFds: Array, env: Object.<string,*>, detached: boolean, uid: number, gid: number, encoding: string, timeout: number, maxBuffer: number, killSignal: string}}
- */
-child_process.Options;
-
-/**
- * @param {string} command
- * @param {Array.<string>=} args
- * @param {child_process.Options=} options
- * @return {child_process.ChildProcess}
- */
-child_process.ChildProcess.spawn;
-
-/**
- * @param {string} command
- * @param {child_process.Options|function(Error, Buffer, Buffer)=} options
- * @param {function(Error, Buffer, Buffer)=} callback
- * @return {child_process.ChildProcess}
- */
-child_process.exec;
-
-/**
- * @param {string} file
- * @param {Array.<string>} args
- * @param {child_process.Options} options
- * @param {function(Error, Buffer, Buffer)} callback
- * @return {child_process.ChildProcess}
- */
-child_process.execFile;
-
-/**
- * @param {string} modulePath
- * @param {Array.<string>=} args
- * @param {child_process.Options=} options
- * @return {child_process.ChildProcess}
- */
-child_process.fork;
 
 module.exports = child_process;

@@ -285,7 +285,11 @@ public class NpmCommandLineRunner extends
         externsMap.get("es5.js"),
         externsMap.get("es6.js"),
         externsMap.get("v8.js"),
-        externsMap.get("nodejs.js"));
+        externsMap.get("nodejs.js"),
+        externsMap.get("nodejs_events.js"),
+        externsMap.get("nodejs_stream.js"),
+        externsMap.get("nodejs_child_process.js"),
+        externsMap.get("nodejs_process.js"));
   }
 
   private SourceFile getNativeLibrary(String name) {

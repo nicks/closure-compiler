@@ -27,7 +27,6 @@
  END_NODE_INCLUDE
  */
 
-var child_process = require('child_process');
 var events = require('events');
 
 /**
@@ -95,7 +94,7 @@ cluster.Worker = function() {};
 cluster.Worker.prototype.id;
 
 /**
- * @type {child_process.ChildProcess}
+ * @type {ChildProcess}
  */
 cluster.Worker.prototype.process;
 
