@@ -16,7 +16,6 @@
 
 /**
  * @fileoverview NodeJS built-ins.
- * @externs
  * @see http://nodejs.org/api/globals.html
  * @see http://nodejs.org/api/modules.html
  * @author Daniel Wirtz <dcode@dcode.io>

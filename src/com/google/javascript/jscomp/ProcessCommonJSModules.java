@@ -68,6 +68,21 @@ public class ProcessCommonJSModules implements CompilerPass {
     this.reportDependencies = reportDependencies;
   }
 
+  void resolveModuleRelativeTypeNames(CompilerInput input) {
+    currentInput = input;
+    Node root = input.getAstRoot(compiler);
+    if (!compiler.hasHaltingErrors()) {
+      resolveModuleRelativeTypeNames(root);
+    }
+    currentInput = null;
+  }
+
+  private void resolveModuleRelativeTypeNames(Node script) {
+    NodeTraversal.traverse(
+        compiler, script,
+        new ResolveModuleRelativeTypeNames());
+  }
+
   void process(CompilerInput input) {
     currentInput = input;
     Node root = input.getAstRoot(compiler);
@@ -204,6 +219,7 @@ public class ProcessCommonJSModules implements CompilerPass {
       // Rename vars to not conflict in global scope.
       NodeTraversal.traverse(compiler, script, new SuffixVarsCallback(
           moduleName));
+      resolveModuleRelativeTypeNames(script);
 
       // Replace all refs to module.exports and exports
       processExports(script, moduleName);
@@ -449,6 +465,48 @@ public class ProcessCommonJSModules implements CompilerPass {
     private void fixTypeNode(NodeTraversal t, Node typeNode) {
       if (typeNode.isString()) {
         String name = typeNode.getString();
+        if (!ES6ModuleLoader.isRelativeIdentifier(name)) {
+          int endIndex = name.indexOf('.');
+          if (endIndex == -1) {
+            endIndex = name.length();
+          }
+          String baseName = name.substring(0, endIndex);
+          Scope.Var var = t.getScope().getVar(baseName);
+          if (var != null && var.isGlobal()) {
+            typeNode.setString(baseName + "$$" + suffix + name.substring(endIndex));
+            typeNode.putProp(Node.ORIGINALNAME_PROP, name);
+          }
+        }
+      }
+
+      for (Node child = typeNode.getFirstChild(); child != null;
+           child = child.getNext()) {
+        fixTypeNode(t, child);
+      }
+    }
+  }
+
+  /**
+   * Traverses a node tree and fixes module references in type annotations.
+   */
+  private class ResolveModuleRelativeTypeNames
+      extends AbstractPostOrderCallback {
+    @Override
+    public void visit(NodeTraversal t, Node n, Node parent) {
+      JSDocInfo info = n.getJSDocInfo();
+      if (info != null) {
+        for (Node typeNode : info.getTypeNodes()) {
+          fixTypeNode(t, typeNode);
+        }
+      }
+    }
+
+    /**
+     * Replace type name references.
+     */
+    private void fixTypeNode(NodeTraversal t, Node typeNode) {
+      if (typeNode.isString()) {
+        String name = typeNode.getString();
         if (ES6ModuleLoader.isRelativeIdentifier(name)) {
           int lastSlash = name.lastIndexOf("/");
           int endIndex = name.indexOf('.', lastSlash);
@@ -464,17 +522,6 @@ public class ProcessCommonJSModules implements CompilerPass {
               localTypeName == null ?
               globalModuleName :
               globalModuleName + localTypeName);
-        } else {
-          int endIndex = name.indexOf('.');
-          if (endIndex == -1) {
-            endIndex = name.length();
-          }
-          String baseName = name.substring(0, endIndex);
-          Scope.Var var = t.getScope().getVar(baseName);
-          if (var != null && var.isGlobal()) {
-            typeNode.setString(baseName + "$$" + suffix + name.substring(endIndex));
-            typeNode.putProp(Node.ORIGINALNAME_PROP, name);
-          }
         }
       }
 

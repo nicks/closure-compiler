@@ -1143,7 +1143,6 @@ public class CommandLineRunner extends
   private static final Set<String> EXPECTED_EXTERNS_NAMES =
       ImmutableSet.<String>builder()
       .addAll(DEFAULT_EXTERNS_NAMES)
-      .add("nodejs.js")
       .build();
 
   final static String EMBEDDED_EXTERNS_PREFIX = "externs.zip//";

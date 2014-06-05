@@ -75,6 +75,7 @@ public class NpmCommandLineRunner extends
     AbstractCommandLineRunner<Compiler, CompilerOptions> {
 
   final static String NODEJS_LIB_PREFIX = "nodejs.zip//";
+  final static String NODEJS_LIB_GLOBALS = "nodejs.zip//globals.js";
 
   // I don't really care about unchecked warnings in this class.
   @SuppressWarnings("unchecked")
@@ -221,15 +222,18 @@ public class NpmCommandLineRunner extends
       }
     }
 
-    NodeJSModuleLoader loader = new NodeJSModuleLoader(compiler, getModuleRoot().toString());
-    ProcessCommonJSModules processor =
-        new ProcessCommonJSModules(
-            compiler, loader, false /* do not create modules */);
+    NodeJSModuleLoader loader =
+        new NodeJSModuleLoader(compiler, getModuleRoot().toString());
 
     // Hack around the compiler API that makes it difficult
     // to inject CompilerInputs directly. Inect them into a module
     // first, then inject that module.
     JSModule module = new JSModule(Compiler.SINGLETON_MODULE_NAME);
+
+    loader.load(NODEJS_LIB_PREFIX + "events.js");
+    loader.load(NODEJS_LIB_PREFIX + "child_process.js");
+    loader.load(NODEJS_LIB_PREFIX + "stream.js");
+    loader.load(NODEJS_LIB_GLOBALS);
 
     for (String mainJsFile : entryJsFiles) {
       // Bootstrap the module loading process with entry points.
@@ -240,12 +244,8 @@ public class NpmCommandLineRunner extends
       }
     }
 
-    // Sadly, manageClosureDependencies sorts based on the original
-    // source (not the transformed source), so will not put
-    // files in the right order on its own. It's easy enough
-    // to do it ourselves.
-    for (CompilerInput input : loader.inputsInTopologicalOrder) {
-      module.add(input);
+    for (CompilerInput input : loader.inputsByAddress.values()) {
+      module.addAndOverrideModule(input);
     }
 
     Result result = compiler.compileModules(
@@ -267,6 +267,9 @@ public class NpmCommandLineRunner extends
     WarningLevel.VERBOSE.setOptionsForWarningLevel(options);
     options.closurePass = true;
     options.inferConsts = true;
+    options.declaredGlobalExternsOnWindow = false;
+    options.setDependencyOptions(
+        new DependencyOptions().setDependencySorting(true));
     return options;
   }
 
@@ -282,8 +285,7 @@ public class NpmCommandLineRunner extends
         externsMap.get("es3.js"),
         externsMap.get("es5.js"),
         externsMap.get("es6.js"),
-        externsMap.get("v8.js"),
-        nodejsMap.get("nodejs.js"));
+        externsMap.get("v8.js"));
 
     // Attempt to load user-defined externs from the "externs" key in "package.json".
     // Expects the contents of "externs" to be an array.
@@ -307,11 +309,6 @@ public class NpmCommandLineRunner extends
   }
 
   private SourceFile getNativeLibrary(String name) {
-    // The globals are special, and shouldn't be loaded through
-    // getNativeLibrary.
-    if ("globals".equals(name)) {
-      return null;
-    }
     return nodejsMap.get(name);
   }
 
@@ -467,8 +464,7 @@ public class NpmCommandLineRunner extends
    */
   class NodeJSModuleLoader extends ES6ModuleLoader {
     private final Compiler compiler;
-    private final Map<String, CompilerInput> inputsByAddress = Maps.newHashMap();
-    private final List<CompilerInput> inputsInTopologicalOrder = Lists.newArrayList();
+    private final Map<String, CompilerInput> inputsByAddress = Maps.newLinkedHashMap();
     private final Path moduleRoot;
 
     NodeJSModuleLoader(Compiler compiler, String moduleRoot) {
@@ -485,6 +481,9 @@ public class NpmCommandLineRunner extends
       File currentDir = new File(referrer.getName())
           .getParentFile();
       if (ES6ModuleLoader.isRelativeIdentifier(name)) {
+        if (referrer.getName().startsWith(NODEJS_LIB_PREFIX)) {
+          return NODEJS_LIB_PREFIX + name.replace("./", "") + ".js";
+        }
         return getCanonicalPath(tryFile(currentDir, name));
       }
 
@@ -497,7 +496,15 @@ public class NpmCommandLineRunner extends
       }
 
       if (getNativeLibrary(name + ".js") != null) {
-        return NODEJS_LIB_PREFIX + name + ".js";
+        String location = NODEJS_LIB_PREFIX + name + ".js";
+
+        // globals.js is an internal hack, and shouldn't be
+        // loaded by requiring it.
+        if (location.equals(NODEJS_LIB_GLOBALS)) {
+          return null;
+        }
+
+        return location;
       }
       return null;
     }
@@ -569,9 +576,18 @@ public class NpmCommandLineRunner extends
       }
 
       ProcessCommonJSModules processor =
-          new ProcessCommonJSModules(compiler, this, false);
-      processor.process(newInput);
-      inputsInTopologicalOrder.add(newInput);
+          new ProcessCommonJSModules(compiler, this, true);
+
+      // globals.js is evaluated in the global scope,
+      // but has some module-relative type names.
+      //
+      // All other files are evaluated in a file scope.
+      if (NODEJS_LIB_GLOBALS.equals(name)) {
+        processor.resolveModuleRelativeTypeNames(newInput);
+      } else {
+        processor.process(newInput);
+      }
+
       return newInput;
     }
 

@@ -204,8 +204,6 @@
       <zipfileset src="${lib.dir}/jsr305.jar"/>
       <zipfileset src="${lib.dir}/protobuf-java.jar"/>
 
-      <zipfileset src="${buildlib.dir}/rhino.jar"/>
-
       <manifest>
         <attribute name="Main-Class"
                    value="com.google.javascript.jscomp.NpmCommandLineRunner" />
