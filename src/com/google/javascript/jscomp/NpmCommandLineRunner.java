@@ -221,9 +221,7 @@ public class NpmCommandLineRunner extends
       }
     }
 
-    FileSystem fs = FileSystems.getDefault();
-    NodeJSModuleLoader loader = new NodeJSModuleLoader(
-        compiler, fs.getPath(moduleRoot.toString()).toAbsolutePath().normalize().toString());
+    NodeJSModuleLoader loader = new NodeJSModuleLoader(compiler, getModuleRoot().toString());
     ProcessCommonJSModules processor =
         new ProcessCommonJSModules(
             compiler, loader, false /* do not create modules */);
@@ -280,12 +278,36 @@ public class NpmCommandLineRunner extends
   @Override
   protected List<SourceFile> createExterns()
       throws FlagUsageException, IOException {
-    return Lists.newArrayList(
+    List<SourceFile> externs = Lists.newArrayList(
         externsMap.get("es3.js"),
         externsMap.get("es5.js"),
         externsMap.get("es6.js"),
         externsMap.get("v8.js"),
-        externsMap.get("nodejs.js"));
+        externsMap.get("nodejs.js"),
+        externsMap.get("nodejs_events.js"),
+        externsMap.get("nodejs_stream.js"),
+        externsMap.get("nodejs_child_process.js"),
+        externsMap.get("nodejs_process.js"));
+
+    // Attempt to load user-defined externs from the "externs" key in "package.json".
+    // Expects the contents of "externs" to be an array.
+    Path moduleRoot = getModuleRoot();
+    File packageFile = new File(moduleRoot.toString(), "package.json");
+    if (packageFile.isFile()) {
+      try {
+        JSONObject packageJson = getPackageJson(packageFile);
+        JSONArray jsonExterns = packageJson.getJSONArray("externs");
+        int len = jsonExterns.length();
+        for(int i = 0; i < len; i++) {
+          String path = moduleRoot.resolve(jsonExterns.getString(i)).normalize().toString();
+          externs.add(SourceFile.fromFile(path));
+        }
+      }
+      catch (JSONException e) {} // no one cares
+      catch (IOException e) {} // no one cares
+    }
+
+    return externs;
   }
 
   private SourceFile getNativeLibrary(String name) {
@@ -306,6 +328,20 @@ public class NpmCommandLineRunner extends
   private int getArgumentCount() {
     return Math.max(1, flags.arguments.size());
   }
+
+  private Path getModuleRoot() {
+    File moduleRoot = new File(getArgument(0));
+    if (!moduleRoot.isDirectory()) {
+      moduleRoot = moduleRoot.getParentFile();
+      if (moduleRoot == null) {
+        moduleRoot = new File("./");
+      }
+    }
+
+    FileSystem fs = FileSystems.getDefault();
+    return fs.getPath(moduleRoot.toString()).toAbsolutePath().normalize();
+  }
+
 
   JSONObject getPackageJson(File packageJsonFile)
       throws IOException, JSONException {
@@ -375,7 +411,7 @@ public class NpmCommandLineRunner extends
   static File tryFile(File dir, String customName) {
     // Do not try to load other types of requires, like json files.
     if (customName.endsWith(".json")) {
-      return new File(dir, customName + ".js");
+      return new File(dir, customName);
     }
 
     File candidate = new File(dir, customName);
@@ -511,6 +547,15 @@ public class NpmCommandLineRunner extends
       } else {
         String path = moduleRoot.resolve(name).normalize().toString();
         newFile = SourceFile.fromFile(path);
+
+        if (name.endsWith(".json")) {
+          // Attempt to modify the file's contents to add an exports declaration.
+          // Otherwise the compiler will interpret the JSON object as a block.
+          try {
+            String json = "module.exports = " + newFile.getCode();
+            newFile = SourceFile.fromCode(path, json);
+          } catch (IOException e) {}
+        }
       }
 
       CompilerInput newInput = new CompilerInput(newFile);

@@ -17,21 +17,88 @@
 /**
  * @fileoverview NodeJS built-ins.
  * @externs
+ * @see http://nodejs.org/api/globals.html
+ * @see http://nodejs.org/api/modules.html
  * @author Daniel Wirtz <dcode@dcode.io>
  * @author nicholas.j.santos@gmail.com (Nick Santos)
  */
 
-/** @const {string} */
+/**
+ * @param name
+ * @return {*}
+ */
+var require = function(name) {}
+
+/**
+ * @return {string}
+ */
+require.resolve = function() {};
+
+/**
+ * @type {Object.<string,*>}
+ */
+require.cache;
+
+/**
+ * @type {Array}
+ */
+require.extensions;
+
+/**
+ * @type {string}
+ */
 var __filename;
 
-/** @const {string} */
+/**
+ * @type {string}
+ */
 var __dirname;
 
 /**
- * @param {string} name
- * @return {?}
+ * @type {!Object}
  */
-function require(name) {}
+var module = {};
+
+/**
+ * @type {*}
+ */
+var exports;
+
+/**
+ * @type {Object.<string,*>}
+ */
+module.exports;
+
+/**
+ * @type {function(string)}
+ */
+module.require;
+
+/**
+ * @type {string}
+ */
+module.filename;
+
+/**
+ * @type {boolean}
+ */
+module.loaded;
+
+/**
+ * @type {*}
+ */
+module.parent;
+
+/**
+ * @type {Array}
+ */
+module.children;
+
+/**
+ * @type {Object.<string,*>}
+ */
+var global = {};
+
 
 // http://nodejs.org/api/timers.html
 
@@ -98,20 +165,6 @@ function setImmediate(fn, var_args) {}
  */
 function clearImmediate(id) {}
 
-
-// http://nodejs.org/api/process.html
-
-/** @constructor */
-function Process() {}
-
-/**
- * @param {Function} fn
- * @see http://nodejs.org/api/process.html#process_process_nexttick_callback
- */
-Process.prototype.nextTick = function (fn) {};
-
-/** @const {Process} */
-var process;
 
 /**
  * @constructor
