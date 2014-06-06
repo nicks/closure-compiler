@@ -36,22 +36,22 @@ require.resolve = function() {};
 /**
  * @type {Object.<string,*>}
  */
-require.cache;
+require.cache = {};
 
 /**
  * @type {Array}
  */
-require.extensions;
+require.extensions = [];
 
 /**
  * @type {string}
  */
-var __filename;
+var __filename = '';
 
 /**
  * @type {string}
  */
-var __dirname;
+var __dirname = '';
 
 /**
  * @const
@@ -61,37 +61,37 @@ var module = {};
 /**
  * @type {*}
  */
-var exports;
+var exports = {};
 
 /**
  * @type {Object.<string,*>}
  */
-module.exports;
+module.exports = {};
 
 /**
  * @type {function(string)}
  */
-module.require;
+module.require = require;
 
 /**
  * @type {string}
  */
-module.filename;
+module.filename = '';
 
 /**
  * @type {boolean}
  */
-module.loaded;
+module.loaded = false;
 
 /**
  * @type {*}
  */
-module.parent;
+module.parent = {};
 
 /**
  * @type {Array}
  */
-module.children;
+module.children = [];
 
 /**
  * @type {Object.<string,*>}
@@ -376,7 +376,7 @@ Process.prototype.uptime;
 Process.prototype.hrtime;
 
 /** @const {Process} */
-var process;
+var process = new Process();
 
 /**
  * @constructor
@@ -491,7 +491,7 @@ Console.prototype.clear = function() {};
 /**
  * @type {!Console}
  */
-var console;
+var console = new Console();
 
 
 
@@ -506,14 +506,14 @@ var Buffer = function (var_args) {};
  * @param {string} encoding
  * @return {boolean}
  */
-Buffer.isEncoding;
+Buffer.isEncoding = new Function();
 
 /**
  * @param {*} obj
  * @return {boolean}
  * @nosideeffects
  */
-Buffer.isBuffer;
+Buffer.isBuffer = new Function();
 
 /**
  * @param {string} string
@@ -521,7 +521,7 @@ Buffer.isBuffer;
  * @return {number}
  * @nosideeffects
  */
-Buffer.byteLength;
+Buffer.byteLength = new Function();
 
 /**
  * @param {Array.<Buffer>} list
@@ -529,7 +529,7 @@ Buffer.byteLength;
  * @return {Buffer}
  * @nosideeffects
  */
-Buffer.concat;
+Buffer.concat = new Function();
 
 /**
  * @param {number} offset
