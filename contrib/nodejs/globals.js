@@ -309,7 +309,7 @@ Process.prototype.config;
 
 /**
  * @param {number} pid
- * @param {string|number=} signal
+ * @param {(string|number)=} signal
  * @see http://nodejs.org/api/process.html#process_process_kill_pid_signal
  */
 Process.prototype.kill;
