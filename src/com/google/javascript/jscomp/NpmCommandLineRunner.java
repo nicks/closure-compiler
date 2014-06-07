@@ -214,14 +214,6 @@ public class NpmCommandLineRunner extends
     setRunOptions(options);
     compiler.initOptions(options);
 
-    File moduleRoot = new File(getArgument(0));
-    if (!moduleRoot.isDirectory()) {
-      moduleRoot = moduleRoot.getParentFile();
-      if (moduleRoot == null) {
-        moduleRoot = new File("./");
-      }
-    }
-
     NodeJSModuleLoader loader =
         new NodeJSModuleLoader(compiler, getModuleRoot().toString());
 
