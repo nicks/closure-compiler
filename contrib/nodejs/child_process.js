@@ -56,14 +56,19 @@ child_process.ChildProcess.prototype.stderr;
 child_process.ChildProcess.prototype.pid;
 
 /**
- * @param {string=} signal
+ * @type {boolean}
+ */
+child_process.ChildProcess.prototype.connected;
+
+/**
+ * @param {(string|number)=} signal
  * @return {void}
  */
 child_process.ChildProcess.prototype.kill;
 
 /**
  * @param {Object.<string,*>} message
- * @param {*} sendHandle
+ * @param {*=} sendHandle
  * @return {void}
  */
 child_process.ChildProcess.prototype.send;
